@@ -91,11 +91,17 @@ class PowerlaunchGame(object):
 
     def launch_cozmo_towards_target(self, robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple):
 
+    	#power 1 = 0% over smallest disance in range. power 10 = at 100% largest distance in range.
+    	launch_distance_percent_max = (self.user_defined_launch_power-1) * (1/9)
+    	print("launch distance percent of max possible:", launch_distance_percent_max)
 
-    	#power 1 = smallest disance in range. power 10 = largest distance in range.
-    	launch_distance = self.user_defined_launch_power * (distance_range_tuple[1]-distance_range_tuple[0]) + distance_range_tuple[0]
+    	#distance the min distance in range, plus a percentange of the distance range
+    	launch_distance = (launch_distance_percent_max * (distance_range_tuple[1]-distance_range_tuple[0])) + distance_range_tuple[0]
+    	print("launch distance:", launch_distance)
+
     	#speed is faster with higher power, but does not affect distance traveled
-    	launch_speed = 30 + (20 * self.user_defined_launch_power)
+    	launch_speed = 10 + (20 * self.user_defined_launch_power)
+    	print("launch speed:", launch_speed)
 
     	drive_cozmo_straight(robot, launch_distance, launch_speed)
 
