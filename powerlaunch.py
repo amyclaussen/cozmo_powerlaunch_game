@@ -56,7 +56,9 @@ class PowerlaunchGame:
             if current_action.has_failed:
                 code, reason = current_action.failure_reason
                 print("Place On Cube failed: code=%s reason=%s" % (code, reason))
-                PowerlaunchGame.finished_stacking_cubes = True
+            else:
+            	PowerlaunchGame.finished_stacking_cubes = True
+                
 
 
     def make_cube_cycle_through_colors(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
@@ -79,8 +81,16 @@ def cozmo_program(robot: cozmo.robot.Robot):
     launch_cozmo_forward(robot, 150, 50)
     PowerlaunchGame.identify_cubes_and_create_list(robot)
     PowerlaunchGame.stack_cubes(robot)
-    PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[1])
+    PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[0])
 
 
 cozmo.run_program(cozmo_program)
+
+
+
+
+#BUGS
+#even when it doesn't stack cubes the light cycles
+#it likes to put the cube on and off indefinitely
+
 
