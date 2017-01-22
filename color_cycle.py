@@ -1,26 +1,19 @@
-"""
-POWERLAUNCH
-
-With this minigame, power up Cozmo and launch your little buddy towards a target! Don't worry, you can't hurt him - powerboosing is one of Cozmo's favorites.
-
-This is a variation on an archery or golf minigame.
-"""
-
-import cozmo
-from cozmo.util import distance_mm, speed_mmps
-
 import asyncio
 import sys
 import time
+import cozmo
 
-def make_cube_cycle_through_colors(robot: cozmo.robot.Robot):
-
+def run(sdk_conn):
+    '''The run method runs once Cozmo is connected.'''
+    robot = sdk_conn.wait_for_robot()
+    print("Got initialized Cozmo")
+    
     #Set up an RGB array
     set_rgb = [255,0,0]  	#start with red
     decColor = 0  		#This variable will decrement one of the RGB values
     incColor = decColor + 1     #This variable will increment one of the RGB values
-
-   #Find a Light Cube to color
+    
+    #Find a Light Cube to color
     cube = None
     look_around = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
     try:
@@ -56,23 +49,11 @@ def make_cube_cycle_through_colors(robot: cozmo.robot.Robot):
     		decColor = 0
     	elif incColor == 3:
     	    incColor = 0  
-
-def stop_on_color_when_tap_cube(robot: cozmo.robot.Robot):
-	pass
-
-def determine_launch_force_based_on_cube_color(robot: cozmo.robot.Robot):
-	pass
-
-def launch_cozmo_forward(robot: cozmo.robot.Robot, distance, speed):
-
-	robot.drive_straight(distance_mm(distance), speed_mmps(speed)).wait_for_completed()
-
-
-def cozmo_program(robot: cozmo.robot.Robot):
-
-	# launch_cozmo_forward(robot, 150, 50)
-
-	make_cube_cycle_through_colors(robot)
-
-
-cozmo.run_program(cozmo_program)
+    
+if __name__ == '__main__':
+    
+    cozmo.setup_basic_logging()
+    try:
+        cozmo.connect(run)
+    except cozmo.ConnectionError as e:
+        sys.exit("A connection error occurred: %s" % e)
