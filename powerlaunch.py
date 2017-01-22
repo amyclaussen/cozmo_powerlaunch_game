@@ -15,38 +15,48 @@ class PowerlaunchGame:
 
     def __init__(self):
         self.list_of_identified_cubes = []
-        self.successfully_found_cubes_check = False
+        self.successfully_found_cubes_check = None
+        self.finished_stacking_cubes = None
 
     def identify_cubes_and_create_list(robot: cozmo.robot.Robot):
 
-        lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
-        print("looking around")
+        PowerlaunchGame.successfully_found_cubes_check = False
 
-        PowerlaunchGame.list_of_identified_cubes = robot.world.wait_until_observe_num_objects(num=2, object_type=cozmo.objects.LightCube, timeout=60)
-        print("cubes identified", PowerlaunchGame.list_of_identified_cubes)
+        while PowerlaunchGame.successfully_found_cubes_check == False:
 
-        lookaround.stop()
+            lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
+            print("looking around")
 
-        if len(PowerlaunchGame.list_of_identified_cubes) < 2:
-            print("Error: need 2 Cubes but only found", len(PowerlaunchGame.list_of_identified_cubes), "Cube(s)")
-        else:
-            print("returning list of", len(PowerlaunchGame.list_of_identified_cubes), "cubes:", PowerlaunchGame.list_of_identified_cubes)
-            PowerlaunchGame.successfully_found_cubes_check = True
+            PowerlaunchGame.list_of_identified_cubes = robot.world.wait_until_observe_num_objects(num=2, object_type=cozmo.objects.LightCube, timeout=60)
+            print("cubes identified", PowerlaunchGame.list_of_identified_cubes)
+
+            lookaround.stop()
+
+            if len(PowerlaunchGame.list_of_identified_cubes) < 2:
+                print("Error: need 2 Cubes but only found", len(PowerlaunchGame.list_of_identified_cubes), "Cube(s)")
+            else:
+                print("returning list of", len(PowerlaunchGame.list_of_identified_cubes), "cubes:", PowerlaunchGame.list_of_identified_cubes)
+                PowerlaunchGame.successfully_found_cubes_check = True
 
 
     def stack_cubes(robot: cozmo.robot.Robot):
 
-        current_action = robot.pickup_object(PowerlaunchGame.list_of_identified_cubes[0])
-        current_action.wait_for_completed()
-        if current_action.has_failed:
-            code, reason = current_action.failure_reason
-            print("Pickup Cube failed: code=%s reason=%s" % (code, reason))
+        PowerlaunchGame.finished_stacking_cubes = False
 
-        current_action = robot.place_on_object(PowerlaunchGame.list_of_identified_cubes[1])
-        current_action.wait_for_completed()
-        if current_action.has_failed:
-            code, reason = current_action.failure_reason
-            print("Place On Cube failed: code=%s reason=%s" % (code, reason))
+        while PowerlaunchGame.finished_stacking_cubes == False:
+
+            current_action = robot.pickup_object(PowerlaunchGame.list_of_identified_cubes[0])
+            current_action.wait_for_completed()
+            if current_action.has_failed:
+                code, reason = current_action.failure_reason
+                print("Pickup Cube failed: code=%s reason=%s" % (code, reason))
+
+            current_action = robot.place_on_object(PowerlaunchGame.list_of_identified_cubes[1])
+            current_action.wait_for_completed()
+            if current_action.has_failed:
+                code, reason = current_action.failure_reason
+                print("Place On Cube failed: code=%s reason=%s" % (code, reason))
+                PowerlaunchGame.finished_stacking_cubes = True
 
 
     def make_cube_cycle_through_colors(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
@@ -66,17 +76,10 @@ def launch_cozmo_forward(robot: cozmo.robot.Robot, distance, speed):
 
 def cozmo_program(robot: cozmo.robot.Robot):
 
-	# launch_cozmo_forward(robot, 150, 50)
-
-	# 
-
-    # cozmo.behavior.BehaviorTypes
-
-
+    launch_cozmo_forward(robot, 150, 50)
     PowerlaunchGame.identify_cubes_and_create_list(robot)
-    if PowerlaunchGame.successfully_found_cubes_check == True:
-        PowerlaunchGame.stack_cubes(robot)
-        PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[1])
+    PowerlaunchGame.stack_cubes(robot)
+    PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[1])
 
 
 cozmo.run_program(cozmo_program)
