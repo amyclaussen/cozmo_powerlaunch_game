@@ -31,22 +31,24 @@ def identify_cubes_and_return_list(robot: cozmo.robot.Robot):
     print("cubes identified", list_of_identified_cubes)
 
     lookaround.stop()
-    print("stopped looking around")
 
     if len(list_of_identified_cubes) < 2:
         print("Error: need 2 Cubes but only found", len(cubes), "Cube(s)")
     else:
-        current_action = robot.pickup_object(list_of_identified_cubes[0])
-        current_action.wait_for_completed()
-        if current_action.has_failed:
-            code, reason = current_action.failure_reason
-            print("Pickup Cube failed: code=%s reason=%s" % (code, reason))
+        print("returning list of", len(list_of_identified_cubes), "cubes:", list_of_identified_cubes)
+        return list_of_identified_cubes
 
-        current_action = robot.place_on_object(list_of_identified_cubes[1])
-        current_action.wait_for_completed()
-        if current_action.has_failed:
-            code, reason = current_action.failure_reason
-            print("Place On Cube failed: code=%s reason=%s" % (code, reason))
+        # current_action = robot.pickup_object(list_of_identified_cubes[0])
+        # current_action.wait_for_completed()
+        # if current_action.has_failed:
+        #     code, reason = current_action.failure_reason
+        #     print("Pickup Cube failed: code=%s reason=%s" % (code, reason))
+
+        # current_action = robot.place_on_object(list_of_identified_cubes[1])
+        # current_action.wait_for_completed()
+        # if current_action.has_failed:
+        #     code, reason = current_action.failure_reason
+        #     print("Place On Cube failed: code=%s reason=%s" % (code, reason))
 
 def stack_cubes(robot: cozmo.robot.Robot, list_of_identified_cubes):
 
