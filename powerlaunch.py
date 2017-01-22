@@ -13,6 +13,8 @@ import color_cycle
 
 import random
 
+import time
+
 
 def drive_cozmo_straight(robot: cozmo.robot.Robot, distance, speed):
 
@@ -84,7 +86,7 @@ class PowerlaunchGame(object):
     	#moves cozmo a random distance away from target, within distance range
     	drive_cozmo_straight(robot, -(random_distance_from_target), 50)
 
-	# def update_lift(self):
+	# def update_lift(self, robot: cozmo.robot.Robot):
 	# 	lift_speed = self.pick_speed(8, 4, 2)
 	# 	lift_vel = (self.lift_up - self.lift_down) * lift_speed
 	# 	self.cozmo.move_lift(lift_vel)
@@ -120,10 +122,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
     # new_game.move_into_launch_position(robot)
 
-	new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
-	print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+	# new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
+	# print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+	
+	robot.move_lift(3)
+	time.sleep(3)
 
-	new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
+	# new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
 
 cozmo.run_program(cozmo_program)
 
