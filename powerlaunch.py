@@ -13,7 +13,7 @@ import color_cycle
 
 def make_cube_cycle_through_colors(robot: cozmo.robot.Robot):
 
-    color_cycle.run_color_cycle(robot)
+    color_cycle.run_color_cycle(robot, 10)
 
 def stop_on_color_when_tap_cube(robot: cozmo.robot.Robot):
 	pass

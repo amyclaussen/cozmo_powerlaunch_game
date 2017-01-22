@@ -3,7 +3,7 @@ import sys
 import time
 import cozmo
 
-def run_color_cycle(robot: cozmo.robot.Robot):
+def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds):
     
     #Set up an RGB array
     set_rgb = [255,0,0]  	#start with red
@@ -21,31 +21,37 @@ def run_color_cycle(robot: cozmo.robot.Robot):
     finally:
         look_around.stop()
     
+    #set number of seconds color will cycle
+
+    time_light_cycle_ends = time.time() + cycle_time_in_seconds
+    
+    while time.time() < time_light_cycle_ends:
+        print("Seconds left until light cycle ends:", time_light_cycle_ends - time.time())
+
     #Cycle the Light Cube colors
-    for y in range(0,10): #repeat the color cycle 10 times
-    	for x in range(1, 254): # 0 - 255 is the full range, but this looks smoother
+        for x in range(1, 254): # 0 - 255 is the full range, but this looks smoother
     		
     		#cross-fade between the two values
-    		set_rgb[decColor] -= 1 #decrement this rgb value
-    		set_rgb[incColor] += 1 #increment this rgb value
+            set_rgb[decColor] -= 1 #decrement this rgb value
+            set_rgb[incColor] += 1 #increment this rgb value
 			
 		#create a light color and tell the cube to display it
-    		new_color = cozmo.lights.Color(rgb=(set_rgb[0],set_rgb[1],set_rgb[2]))
-    		new_light = cozmo.lights.Light(on_color=new_color)
-    		cube.set_lights(new_light)
+            new_color = cozmo.lights.Color(rgb=(set_rgb[0],set_rgb[1],set_rgb[2]))
+            new_light = cozmo.lights.Light(on_color=new_color)
+            cube.set_lights(new_light)
     		
     		#wait for a moment to see the change
-    		time.sleep(0.0003) 
+            time.sleep(0.003) 
     	
     	#pick the next RGB value to decrement and increment
-    	decColor = decColor + 1
-    	incColor = incColor + 1  
+        decColor = decColor + 1
+        incColor = incColor + 1  
     	
     	# handle the wrap around cases
-    	if decColor == 3: 
-    		decColor = 0
-    	elif incColor == 3:
-    	    incColor = 0  
+        if decColor == 3: 
+            decColor = 0
+        elif incColor == 3:
+            incColor = 0  
     
 if __name__ == '__main__':
     
