@@ -3,10 +3,7 @@ import sys
 import time
 import cozmo
 
-def run(sdk_conn):
-    '''The run method runs once Cozmo is connected.'''
-    robot = sdk_conn.wait_for_robot()
-    print("Got initialized Cozmo")
+def run_color_cycle(robot: cozmo.robot.Robot):
     
     #Set up an RGB array
     set_rgb = [255,0,0]  	#start with red
@@ -38,7 +35,7 @@ def run(sdk_conn):
     		cube.set_lights(new_light)
     		
     		#wait for a moment to see the change
-    		time.sleep(0.005) 
+    		time.sleep(0.0003) 
     	
     	#pick the next RGB value to decrement and increment
     	decColor = decColor + 1
@@ -52,8 +49,4 @@ def run(sdk_conn):
     
 if __name__ == '__main__':
     
-    cozmo.setup_basic_logging()
-    try:
-        cozmo.connect(run)
-    except cozmo.ConnectionError as e:
-        sys.exit("A connection error occurred: %s" % e)
+    cozmo.run_program(run_color_cycle)
