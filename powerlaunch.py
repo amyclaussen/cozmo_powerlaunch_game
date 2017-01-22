@@ -83,8 +83,10 @@ class PowerlaunchGame:
     	#moves cozmo a random distance away from target, within distance range
     	drive_cozmo_straight(robot, -(random_distance_from_target), 50)
 
-    # def launch_cozmo_towards_taget(robot: cozmo.robot.Robot)
+    def launch_cozmo_towards_taget(robot: cozmo.robot.Robot):
 
+    	PowerlaunchGame.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
+    	print("-------->Charging Cozmo with", PowerlaunchGame.user_defined_launch_power, "electroids!\n\n\n")
 
 
 def cozmo_program(robot: cozmo.robot.Robot):
@@ -94,7 +96,8 @@ def cozmo_program(robot: cozmo.robot.Robot):
     # PowerlaunchGame.stack_cubes(robot)
     # PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[0])
 
-    PowerlaunchGame.move_into_launch_position(robot, (100, 400), (0, 0))
+    # PowerlaunchGame.move_into_launch_position(robot, (100, 400), (0, 0))
+    PowerlaunchGame.launch_cozmo_towards_taget(robot)
 
 cozmo.run_program(cozmo_program)
 
