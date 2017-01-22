@@ -15,6 +15,7 @@ class PowerlaunchGame:
 
     def __init__(self):
         self.list_of_identified_cubes = []
+        self.successfully_found_cubes_check = False
 
     def identify_cubes_and_create_list(robot: cozmo.robot.Robot):
         lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
@@ -29,6 +30,21 @@ class PowerlaunchGame:
             print("Error: need 2 Cubes but only found", len(PowerlaunchGame.list_of_identified_cubes), "Cube(s)")
         else:
             print("returning list of", len(PowerlaunchGame.list_of_identified_cubes), "cubes:", PowerlaunchGame.list_of_identified_cubes)
+            PowerlaunchGame.successfully_found_cubes_check = True
+
+    def stack_cubes(robot: cozmo.robot.Robot):
+
+        current_action = robot.pickup_object(PowerlaunchGame.list_of_identified_cubes[0])
+        current_action.wait_for_completed()
+        if current_action.has_failed:
+            code, reason = current_action.failure_reason
+            print("Pickup Cube failed: code=%s reason=%s" % (code, reason))
+
+        current_action = robot.place_on_object(PowerlaunchGame.list_of_identified_cubes[1])
+        current_action.wait_for_completed()
+        if current_action.has_failed:
+            code, reason = current_action.failure_reason
+            print("Place On Cube failed: code=%s reason=%s" % (code, reason))
 
 
 def make_cube_cycle_through_colors(robot: cozmo.robot.Robot):
@@ -55,6 +71,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
     # cozmo.behavior.BehaviorTypes
 
     PowerlaunchGame.identify_cubes_and_create_list(robot)
+    PowerlaunchGame.stack_cubes(robot)
 
 
 cozmo.run_program(cozmo_program)
