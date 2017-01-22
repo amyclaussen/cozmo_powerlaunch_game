@@ -22,13 +22,12 @@ def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds):
         look_around.stop()
     
     #set number of seconds color will cycle
-
     time_light_cycle_ends = time.time() + cycle_time_in_seconds
-    
-    while time.time() < time_light_cycle_ends:
-        print("Seconds left until light cycle ends:", time_light_cycle_ends - time.time())
 
     #Cycle the Light Cube colors
+    while time.time() < time_light_cycle_ends:
+        print("Seconds left until light cycle ends:", int(time_light_cycle_ends - time.time()))
+
         for x in range(1, 254): # 0 - 255 is the full range, but this looks smoother
     		
     		#cross-fade between the two values
