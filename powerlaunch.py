@@ -14,6 +14,10 @@ def make_block_cycle_through_colors():
 	pass
 
 def stop_on_color_when_tap_cube():
+	pass
+
+def determine_launch_force_based_on_cube_color():
+	pass
 
 def launch_cozmo_forward(robot: cozmo.robot.Robot, distance, speed):
 
