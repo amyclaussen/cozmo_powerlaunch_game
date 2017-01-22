@@ -11,12 +11,21 @@ from cozmo.util import distance_mm, speed_mmps
 
 import color_cycle
 
+import random
+
+
+def drive_cozmo_straight(robot: cozmo.robot.Robot, distance, speed):
+
+	robot.drive_straight(distance_mm(distance), speed_mmps(speed)).wait_for_completed()
+
+
 class PowerlaunchGame:
 
     def __init__(self):
         self.list_of_identified_cubes = []
         self.successfully_found_cubes_check = None
         self.finished_stacking_cubes = None
+        self.user_defined_launch_power = None
 
     def identify_cubes_and_create_list(robot: cozmo.robot.Robot):
 
@@ -57,32 +66,35 @@ class PowerlaunchGame:
                 code, reason = current_action.failure_reason
                 print("Place On Cube failed: code=%s reason=%s" % (code, reason))
             else:
-            	PowerlaunchGame.finished_stacking_cubes = True
-                
+            	PowerlaunchGame.finished_stacking_cubes = True                
 
 
     def make_cube_cycle_through_colors(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
 
         color_cycle.run_color_cycle(robot, cycle_time_in_seconds, cube)
 
-def stop_on_color_when_tap_cube(robot: cozmo.robot.Robot):
-	pass
 
-def determine_launch_force_based_on_cube_color(robot: cozmo.robot.Robot):
-	pass
+    def move_into_launch_position(robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple):
 
-def launch_cozmo_forward(robot: cozmo.robot.Robot, distance, speed):
+    	#creates random distance away from target, within distance range
+    	random_distance_from_target = random.randint(distance_range_tuple[0], distance_range_tuple[1])
+    	print("moving", random_distance_from_target, "mm away from target")
 
-	robot.drive_straight(distance_mm(distance), speed_mmps(speed)).wait_for_completed()
+    	#moves cozmo a random distance away from target, within distance range
+    	drive_cozmo_straight(robot, -(random_distance_from_target), 50)
+
+    # def launch_cozmo_towards_taget(robot: cozmo.robot.Robot)
+
 
 
 def cozmo_program(robot: cozmo.robot.Robot):
 
-    launch_cozmo_forward(robot, 150, 50)
-    PowerlaunchGame.identify_cubes_and_create_list(robot)
-    PowerlaunchGame.stack_cubes(robot)
-    PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[0])
+    # drive_cozmo_straight(robot, 150, 50)
+    # PowerlaunchGame.identify_cubes_and_create_list(robot)
+    # PowerlaunchGame.stack_cubes(robot)
+    # PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[0])
 
+    PowerlaunchGame.move_into_launch_position(robot, (100, 400), (0, 0))
 
 cozmo.run_program(cozmo_program)
 
