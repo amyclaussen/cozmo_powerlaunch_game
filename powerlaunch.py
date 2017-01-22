@@ -18,6 +18,7 @@ class PowerlaunchGame:
         self.successfully_found_cubes_check = False
 
     def identify_cubes_and_create_list(robot: cozmo.robot.Robot):
+
         lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
         print("looking around")
 
@@ -70,8 +71,10 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
     # cozmo.behavior.BehaviorTypes
 
+
     PowerlaunchGame.identify_cubes_and_create_list(robot)
-    PowerlaunchGame.stack_cubes(robot)
+    if PowerlaunchGame.successfully_found_cubes_check == True:
+        PowerlaunchGame.stack_cubes(robot)
 
 
 cozmo.run_program(cozmo_program)
