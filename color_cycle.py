@@ -3,23 +3,12 @@ import sys
 import time
 import cozmo
 
-def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds):
+def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
     
     #Set up an RGB array
     set_rgb = [255,0,0]  	#start with red
     decColor = 0  		#This variable will decrement one of the RGB values
     incColor = decColor + 1     #This variable will increment one of the RGB values
-    
-    #Find a Light Cube to color
-    cube = None
-    look_around = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
-    try:
-    	cube = robot.world.wait_for_observed_light_cube(timeout=60)
-    except asyncio.TimeoutError:
-        print("Didn't find a cube :-(")
-        return
-    finally:
-        look_around.stop()
     
     #set number of seconds color will cycle
     time_light_cycle_ends = time.time() + cycle_time_in_seconds

@@ -33,6 +33,7 @@ class PowerlaunchGame:
             print("returning list of", len(PowerlaunchGame.list_of_identified_cubes), "cubes:", PowerlaunchGame.list_of_identified_cubes)
             PowerlaunchGame.successfully_found_cubes_check = True
 
+
     def stack_cubes(robot: cozmo.robot.Robot):
 
         current_action = robot.pickup_object(PowerlaunchGame.list_of_identified_cubes[0])
@@ -48,9 +49,9 @@ class PowerlaunchGame:
             print("Place On Cube failed: code=%s reason=%s" % (code, reason))
 
 
-def make_cube_cycle_through_colors(robot: cozmo.robot.Robot):
+    def make_cube_cycle_through_colors(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
 
-    color_cycle.run_color_cycle(robot, 10)
+        color_cycle.run_color_cycle(robot, cycle_time_in_seconds, cube)
 
 def stop_on_color_when_tap_cube(robot: cozmo.robot.Robot):
 	pass
@@ -67,7 +68,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	# launch_cozmo_forward(robot, 150, 50)
 
-	# make_cube_cycle_through_colors(robot)
+	# 
 
     # cozmo.behavior.BehaviorTypes
 
@@ -75,6 +76,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
     PowerlaunchGame.identify_cubes_and_create_list(robot)
     if PowerlaunchGame.successfully_found_cubes_check == True:
         PowerlaunchGame.stack_cubes(robot)
+        PowerlaunchGame.make_cube_cycle_through_colors(robot, 10, PowerlaunchGame.list_of_identified_cubes[1])
 
 
 cozmo.run_program(cozmo_program)
