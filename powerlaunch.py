@@ -131,15 +131,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
 	new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
 	print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
 	
-	# robot.move_lift(3)
-	# time.sleep(3)
-
 	new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
 
 	robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
 
 	if new_game.did_win:
 	    print("You and Cozmo Win!")
+	    robot.play_anim_trigger(cozmo.anim.Triggers.NamedFaceInitialGreeting).wait_for_completed()
 	else:
 		print("Try Again!")
 
