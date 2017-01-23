@@ -107,7 +107,7 @@ class PowerlaunchGame(object):
 
     	drive_cozmo_straight(robot, launch_distance, launch_speed)
 
-    	if launch_distance > self.random_distance_from_target + 30:
+    	if launch_distance > self.random_distance_from_target:
     		self.did_win = True
 
 
