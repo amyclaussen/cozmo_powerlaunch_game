@@ -9,7 +9,7 @@ This is a variation on an archery or golf minigame.
 """
 
 import cozmo
-from cozmo.util import distance_mm, speed_mmps
+from cozmo.util import distance_mm, speed_mmps, degrees
 
 import color_cycle
 
@@ -32,6 +32,7 @@ class PowerlaunchGame(object):
 		self.finished_stacking_cubes = None
 		self.random_distance_from_target = None
 		self.user_defined_launch_power = None
+		self.launch_distance = None
 		self.did_win = False
 
 	def identify_cubes_and_create_list(self, robot: cozmo.robot.Robot):
@@ -98,16 +99,16 @@ class PowerlaunchGame(object):
 		print("launch distance percent of max possible:", launch_distance_percent_max)
 
 		#distance the min distance in range, plus a percentange of the distance range
-		launch_distance = (launch_distance_percent_max * (distance_range_tuple[1]-distance_range_tuple[0])) + distance_range_tuple[0]
-		print("launch distance:", launch_distance)
+		self.launch_distance = (launch_distance_percent_max * (distance_range_tuple[1]-distance_range_tuple[0])) + distance_range_tuple[0]
+		print("launch distance:", self.launch_distance)
 
 		#speed is faster with higher power, but does not affect distance traveled
 		launch_speed = 10 + (20 * self.user_defined_launch_power)
 		print("launch speed:", launch_speed)
 
-		drive_cozmo_straight(robot, launch_distance, launch_speed)
+		drive_cozmo_straight(robot, self.launch_distance, launch_speed)
 
-		if launch_distance > self.random_distance_from_target:
+		if self.launch_distance > self.random_distance_from_target:
 			self.did_win = True
 
 
@@ -120,21 +121,24 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	drive_cozmo_straight(robot, 150, 50)
 
+	new_game.identify_cubes_and_create_list(robot)
+
+	new_game.stack_cubes(robot)
+
+	robot.play_anim("anim_explorer_getin_01", in_parallel=True)
+
+	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
+
 	while not new_game.did_win:
-		new_game.identify_cubes_and_create_list(robot)
-
-		new_game.stack_cubes(robot)
-
-		robot.play_anim("anim_explorer_getin_01", in_parallel=True)
-
-		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
-
 		new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
-		robot.play_anim("anim_launch_cubediscovery")
+		# robot.play_anim("anim_launch_cubediscovery")
 
 		new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
 		print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+
+		robot.play_anim("anim_sparking_getin_01").wait_for_completed()
+		robot.turn_in_place(degrees(-28)).wait_for_completed()
 		
 		new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
 
@@ -143,7 +147,9 @@ def cozmo_program(robot: cozmo.robot.Robot):
 		if new_game.did_win:
 			break
 		else:
-			input("\n\n\n-------->Sometimes we're filled with sor-robot we must try again!\n\n\n")
+			input("\n\n\n-------->Sometimes we're filled with sor-robot we must try again! (Press return.)\n\n\n")
+			#moves Cozmo to cube so he can restart game
+			drive_cozmo_straight(robot, (new_game.random_distance_from_target - new_game.launch_distance), 50)
 
 	print("You and Cozmo Win!")
 
