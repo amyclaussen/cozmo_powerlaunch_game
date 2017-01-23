@@ -3,7 +3,7 @@ import sys
 import time
 import cozmo
 
-def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
+def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube, cycle_speed):
     
     #Set up an RGB array
     set_rgb = [255,0,0]  	#start with red
@@ -29,7 +29,7 @@ def run_color_cycle(robot: cozmo.robot.Robot, cycle_time_in_seconds, cube):
             cube.set_lights(new_light)
     		
     		#wait for a moment to see the change
-            time.sleep(0.003) 
+            time.sleep(cycle_speed) 
     	
     	#pick the next RGB value to decrement and increment
         decColor = decColor + 1
