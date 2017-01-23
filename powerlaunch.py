@@ -121,10 +121,14 @@ def cozmo_program(robot: cozmo.robot.Robot):
 	drive_cozmo_straight(robot, 150, 50)
 
 	new_game.identify_cubes_and_create_list(robot)
-	
+
 	new_game.stack_cubes(robot)
 
-	robot.run_timed_behavior(cozmo.behavior.BehaviorTypes.KnockOverCubes, active_time=60)
+	drive_cozmo_straight(robot, 50, 50)
+
+	robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+
+	# robot.run_timed_behavior(cozmo.behavior.BehaviorTypes.KnockOverCubes, active_time=60)
 
 	# new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0])
 
