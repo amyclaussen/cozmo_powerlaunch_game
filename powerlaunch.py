@@ -124,6 +124,8 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	new_game.stack_cubes(robot)
 
+	robot.play_anim("anim_explorer_getin_01", in_parallel=True)
+
 	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0])
 
 	new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
