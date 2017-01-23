@@ -124,28 +124,24 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	new_game.stack_cubes(robot)
 
-	drive_cozmo_straight(robot, 50, 50)
+	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0])
 
-	robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+	new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
-	# robot.run_timed_behavior(cozmo.behavior.BehaviorTypes.KnockOverCubes, active_time=60)
-
-	# new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0])
-
-	# new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
-
-	# new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
-	# print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+	new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
+	print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
 	
 	# robot.move_lift(3)
 	# time.sleep(3)
 
-	# new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
+	new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
 
-	# if new_game.did_win:
-	#     print("You and Cozmo Win!")
-	# else:
-	# 	print("Try Again!")
+	robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+
+	if new_game.did_win:
+	    print("You and Cozmo Win!")
+	else:
+		print("Try Again!")
 
 cozmo.run_program(cozmo_program)
 
