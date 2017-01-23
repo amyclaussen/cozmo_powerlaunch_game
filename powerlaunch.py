@@ -120,34 +120,36 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	drive_cozmo_straight(robot, 150, 50)
 
-	new_game.identify_cubes_and_create_list(robot)
+	while not new_game.did_win:
+		new_game.identify_cubes_and_create_list(robot)
 
-	new_game.stack_cubes(robot)
+		new_game.stack_cubes(robot)
 
-	robot.play_anim("anim_explorer_getin_01", in_parallel=True)
+		robot.play_anim("anim_explorer_getin_01", in_parallel=True)
 
-	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
+		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
 
-	new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
+		new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
-	robot.play_anim("anim_launch_cubediscovery")
+		robot.play_anim("anim_launch_cubediscovery")
 
-	new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
-	print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
-	
-	new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
+		new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
+		print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+		
+		new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
 
-	robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+		robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
 
-	if new_game.did_win:
-		print("You and Cozmo Win!")
+		if new_game.did_win:
+			break
+		else:
+			input("\n\n\n-------->Sometimes we're filled with sor-robot we must try again!\n\n\n")
 
-		robot.play_anim_trigger(cozmo.anim.Triggers.NamedFaceInitialGreeting, in_parallel=True)
+	print("You and Cozmo Win!")
 
-		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
+	robot.play_anim_trigger(cozmo.anim.Triggers.NamedFaceInitialGreeting, in_parallel=True)
 
-	else:
-		print("Try Again!")
+	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
 
 cozmo.run_program(cozmo_program)
 
