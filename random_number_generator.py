@@ -1,4 +1,0 @@
-"""
-random number generator
-"""
-

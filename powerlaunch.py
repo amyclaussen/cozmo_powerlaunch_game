@@ -18,6 +18,7 @@ import random
 import time
 
 
+
 def drive_cozmo_straight(robot: cozmo.robot.Robot, distance, speed):
 
 	robot.drive_straight(distance_mm(distance), speed_mmps(speed)).wait_for_completed()
@@ -33,7 +34,7 @@ class PowerlaunchGame(object):
 		self.random_distance_from_target = None
 		self.user_defined_launch_power = None
 		self.launch_distance = None
-		self.did_win = False
+		self.did_win = None
 
 	def identify_cubes_and_create_list(self, robot: cozmo.robot.Robot):
 
@@ -42,7 +43,7 @@ class PowerlaunchGame(object):
 		while self.successfully_found_cubes_check == False:
 
 			lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
-			print("looking around")
+			print("Cozmo is helping by setting up the cube stack as a target.")
 
 			self.list_of_identified_cubes = robot.world.wait_until_observe_num_objects(num=2, object_type=cozmo.objects.LightCube, timeout=60)
 			print("cubes identified", self.list_of_identified_cubes)
@@ -89,7 +90,7 @@ class PowerlaunchGame(object):
 		print("moving", self.random_distance_from_target, "mm away from target")
 
 		#moves cozmo a random distance away from target, within distance range. The -30 is to account for movement during the cubediscovery animation.
-		drive_cozmo_straight(robot, -(self.random_distance_from_target - 30), 50)
+		drive_cozmo_straight(robot, -(self.random_distance_from_target - 60), 50)
 
 
 	def launch_cozmo_towards_target(self, robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple):
@@ -117,46 +118,75 @@ def cozmo_program(robot: cozmo.robot.Robot):
 	distance_range_tuple = (100, 300)
 	angle_range_tuple = (0, 0)
 
-	new_game = PowerlaunchGame()
+	user_menu_input = None
 
 	drive_cozmo_straight(robot, 150, 50)
 
-	new_game.identify_cubes_and_create_list(robot)
+	robot.play_anim("anim_reacttoblock_success_01", in_parallel=True)
 
-	new_game.stack_cubes(robot)
+	user_menu_input = input("\n\n\n-------->Welcome to Powerlaunch!\n\n-------->The goal is to Ready, Aim, POWER!\n-------->After Cozmo gets a cube stack ready, take aim, and decide how much power.\n-------->Careful not to be underpowered or overpowered!\n\n-------->Press return to begin. Press q to quit.")
 
-	robot.play_anim("anim_explorer_getin_01", in_parallel=True)
+	while user_menu_input != "q":
 
-	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
+		new_game = PowerlaunchGame()
 
-	while not new_game.did_win:
-		new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
+		new_game.identify_cubes_and_create_list(robot)
 
-		# robot.play_anim("anim_launch_cubediscovery")
+		new_game.stack_cubes(robot)
 
-		new_game.user_defined_launch_power = int(input("\n\n\n-------->POWER! How many electroids will you give Cozmo (1-10)? "))
-		print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
+		robot.play_anim("anim_explorer_getin_01", in_parallel=True)
 
-		robot.play_anim("anim_sparking_getin_01").wait_for_completed()
-		robot.turn_in_place(degrees(-28)).wait_for_completed()
-		
-		new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
+		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
 
-		robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+		new_game.did_win = False
 
-		if new_game.did_win:
-			break
-		else:
-			input("\n\n\n-------->Sometimes we're filled with sor-robot we must try again! (Press return.)\n\n\n")
-			#moves Cozmo to cube so he can restart game
-			drive_cozmo_straight(robot, (new_game.random_distance_from_target - new_game.launch_distance), 50)
+		while not new_game.did_win:
 
-	print("You and Cozmo Win!")
+			new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
-	robot.play_anim_trigger(cozmo.anim.Triggers.NamedFaceInitialGreeting, in_parallel=True)
+			robot.play_anim("anim_launch_cubediscovery")
 
-	new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
+			new_game.user_defined_launch_power = int(input("\n\n\n-------->Time to Powerlaunch!\n-------->Remember, too little power and he won't reach the target.\n-------->Too much and he'll be overpowered!\n\n-------->How many electroids will you give Cozmo (1-10)? "))
+			print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
 
-cozmo.run_program(cozmo_program)
+			robot.play_anim("anim_sparking_getin_01").wait_for_completed()
+			robot.turn_in_place(degrees(-27)).wait_for_completed()
+			
+			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
+
+			robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+
+			if new_game.did_win:
+				
+				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True)
+
+				new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
+
+				user_menu_input = input('\n\n\n-------->You and Cozmo won! Press "return" to play again! Press "q" to quit.\n\n\n')
+
+				break
+
+			if new_game.random_distance_from_target > new_game.launch_distance:
+
+				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
+
+				user_menu_input = input('\n\n\n-------->Not enough power! Press "return" to try again! Press "q" to quit.\n\n\n')
+				#moves Cozmo to cube so he can restart game
+				robot.turn_in_place(degrees(5)).wait_for_completed()
+				drive_cozmo_straight(robot, (new_game.random_distance_from_target - new_game.launch_distance + 60), 50)
+
+				break
+
+			else:
+				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
+
+				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
+
+				break
+
+
+if __name__ == '__main__':
+
+	cozmo.run_program(cozmo_program)
 
 
