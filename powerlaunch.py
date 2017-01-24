@@ -109,8 +109,12 @@ class PowerlaunchGame(object):
 
 		drive_cozmo_straight(robot, self.launch_distance, launch_speed)
 
-		if self.launch_distance > self.random_distance_from_target:
-			self.did_win = True
+		if self.random_distance_from_target - 5 <= self.launch_distance >= self.random_distance_from_target + 5:
+			self.did_win = "win"
+		elif self.launch_distance < self.random_distance_from_target - 5:
+			self.did_win = "under"
+		else:
+			self.did_win = "over"
 
 
 def cozmo_program(robot: cozmo.robot.Robot):
@@ -134,13 +138,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 		new_game.stack_cubes(robot)
 
-		robot.play_anim("anim_explorer_getin_01", in_parallel=True)
+		robot.play_anim("anim_launch_cubediscovery", in_parallel=True)
 
 		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
 
-		new_game.did_win = False
+		new_game.did_win = None
 
-		while not new_game.did_win:
+		while new_game.did_win != "win":
 
 			new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
@@ -156,9 +160,9 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 			robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
 
-			if new_game.did_win:
+			if new_game.did_win == "win":
 				
-				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True)
+				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True).wait_for_completed()
 
 				new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
 
@@ -166,7 +170,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 				break
 
-			if new_game.random_distance_from_target > new_game.launch_distance:
+			elif new_game.did_win == "under":
 
 				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
 
@@ -178,6 +182,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 				break
 
 			else:
+				#new_game.did_win == "over"
 				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
 
 				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
