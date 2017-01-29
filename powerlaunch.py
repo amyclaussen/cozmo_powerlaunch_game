@@ -16,6 +16,7 @@ from cozmo.util import distance_mm, speed_mmps, degrees
 import color_cycle
 import random
 import time
+import sys
 
 
 
@@ -42,7 +43,7 @@ class PowerlaunchGame(object):
 			lookaround = robot.start_behavior(cozmo.behavior.BehaviorTypes.LookAroundInPlace)
 			print("\n-------->Cozmo is helping by setting up the cube stack as a target.", "Try", attempt + 1, "of 3.")
 
-			self.list_of_identified_cubes = robot.world.wait_until_observe_num_objects(num=2, object_type=cozmo.objects.LightCube, timeout=60)
+			self.list_of_identified_cubes = robot.world.wait_until_observe_num_objects(num=2, object_type=cozmo.objects.LightCube, timeout=10)
 			print("cubes identified", self.list_of_identified_cubes)
 
 			lookaround.stop()
@@ -51,10 +52,11 @@ class PowerlaunchGame(object):
 				print("Error: need 2 Cubes but only found", len(self.list_of_identified_cubes), "Cube(s)")
 			else:
 				print("returning list of", len(self.list_of_identified_cubes), "cubes:", self.list_of_identified_cubes)
-				("\n-------->Cozmo found his cubes! He'll stack them to make our target.")
+				print("\n-------->Cozmo found his cubes! He'll stack them to make our target.")
 				return
-		print("\n-------->Cozmo didn't find the cubes. Try putting the cubes farther away from his power station.")
-
+		print("\n-------->Cozmo didn't find the cubes after 3 tries. He's a bit astigmatic. He'll be okay - but try putting the cubes farther away from his power station.")
+		input("Press enter to quit game. Then reposition the cubes and rerun the game.")
+		sys.exit()
 
 	def stack_cubes(self, robot: cozmo.robot.Robot):
 
