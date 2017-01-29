@@ -55,14 +55,12 @@ class PowerlaunchGame(object):
 				print("\n-------->Cozmo found his cubes! He'll stack them to make our target.")
 				return
 		print("\n-------->Cozmo didn't find the cubes after 3 tries. He's a bit astigmatic. He'll be okay - but try putting the cubes farther away from his power station.")
-		input("Press enter to quit game. Then reposition the cubes and rerun the game.")
+		input("\n-------->Press enter to quit game. Then reposition the cubes and rerun the game.")
 		sys.exit()
 
 	def stack_cubes(self, robot: cozmo.robot.Robot):
 
-		finished_stacking_cubes = False
-
-		while finished_stacking_cubes == False:
+		for attempt in range(3):
 
 			current_action = robot.pickup_object(self.list_of_identified_cubes[0])
 			current_action.wait_for_completed()
@@ -76,7 +74,12 @@ class PowerlaunchGame(object):
 				code, reason = current_action.failure_reason
 				print("Place On Cube failed: code=%s reason=%s" % (code, reason))
 			else:
-				finished_stacking_cubes = True                
+				print("returning list of", len(self.list_of_identified_cubes), "cubes:", self.list_of_identified_cubes)
+				print("\n-------->Cozmo found his cubes! He'll stack them to make our target.")
+				return
+		print("\n-------->Cozmo didn't stack is cubes correctly after 3 tries.")
+		input("\n-------->Press enter to quit game. Then place him on his charging station and rerun the game.")
+		sys.exit()             
 
 
 	def make_cube_cycle_through_colors(self, robot: cozmo.robot.Robot, cycle_time_in_seconds, cube, cycle_speed):
@@ -130,7 +133,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 	robot.play_anim("anim_reacttoblock_success_01", in_parallel=True)
 
-	user_menu_input = input("\n\n\n-------->Welcome to Powerlaunch!\n\n-------->The goal is to topple a cube stack by powering up Cozmo with just the right amount of electroids.\n-------->After Cozmo gets a cube stack ready, take aim, and decide how much power.\n-------->Careful not to be underpowered or overpowered!\n\n-------->Press return to begin, and Ready, Aim, POWER!.")
+	user_menu_input = input("\n\n\n-------->Welcome to Powerlaunch!\n\n-------->The goal is to topple a cube stack by powering up Cozmo with just the right amount of electroids.\n-------->After Cozmo gets a cube stack ready, take aim, and decide how much power.\n-------->Careful not to be underpowered or overpowered!\n\n-------->Press return to begin.")
 
 	while user_menu_input != "q":
 
@@ -155,7 +158,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 			new_game.user_defined_launch_power = int(input("\n\n\n-------->Time to Powerlaunch!\n-------->Remember, too little power and he won't reach the target.\n-------->Too much and he'll be overpowered!\n\n-------->How many electroids will you give Cozmo (1-10)? "))
 			print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
 
-			robot.play_anim("anim_sparking_getin_01")
+			robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 			#turns cozmo to correct for movement during animation.
 			#to do: remove "wait for completed" redunancies. look at SDK for info on parallel and WFC.
 			robot.turn_in_place(degrees(-27)).wait_for_completed()
@@ -167,6 +170,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 			if new_game.did_win == "win":
 				
 				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True).wait_for_completed() #to do: look up in parallel
+				#to do: sometimes he doesn't flip the cube right
 
 				new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
 
@@ -186,7 +190,9 @@ def cozmo_program(robot: cozmo.robot.Robot):
 				break
 
 			else:
+				#to do: going over registers as a win.
 				#new_game.did_win == "over"
+				#to do: the cozmo waits for the light cycle to be dome before continuing on
 				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
 
 				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
