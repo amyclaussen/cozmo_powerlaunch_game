@@ -174,13 +174,20 @@ def cozmo_program(robot: cozmo.robot.Robot):
 			robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 			#turns cozmo to correct for movement during animation.
 			#to do: remove "wait for completed" redunancies. look at SDK for info on parallel and WFC.
-			robot.turn_in_place(degrees(-29)).wait_for_completed()
+			robot.turn_in_place(degrees(-23)).wait_for_completed()
 			
 			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple,tunable_margin_of_error)
 
 			if new_game.did_win == "win":
 				
 				robot.play_anim("anim_sparking_getin_01").wait_for_completed()
+
+				# get close enough to FLIP it
+				robot.drive_wheels(40,40)
+				robot.set_lift_height(1, duration=0.2).wait_for_completed()
+				# do the flipping
+				robot.drive_wheels(-70,-70)
+				robot.set_lift_height(0, duration=1.2).wait_for_completed()
 
 				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True) #to do: look up in parallel
 				#to do: sometimes he doesn't flip the cube right
@@ -195,17 +202,18 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 				user_menu_input = input('\n\n\n-------->Not enough power! Press "return" to try again! Press "q" to quit.\n\n\n')
 				#moves Cozmo to cube so he can restart game
-				robot.turn_in_place(degrees(5)).wait_for_completed()
-				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance + 60), 50)
+				robot.turn_in_place(degrees(6)).wait_for_completed()
+				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance + 30), 50)
 
 			else:
 				#to do: going over registers as a win.
 				#new_game.did_win == "over"
-				#to do: the cozmo waits for the light cycle to be dome before continuing on
+				#to do: the cozmo waits for the light cycle to be done before continuing on
 				robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
 
 				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
-
+				#moves Cozmo to restart game
+				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance + 50), 50)
 
 
 if __name__ == '__main__':
