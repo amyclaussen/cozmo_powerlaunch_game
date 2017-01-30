@@ -156,7 +156,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
 		robot.play_anim("anim_reacttocliff_edge_01", in_parallel=True).wait_for_completed()
 		#gets cozmo right next to target
 		drive_cozmo_distance_angle(robot, 70, 50)
-		robot.turn_in_place(degrees(5)).wait_for_completed()
+		robot.turn_in_place(degrees(3)).wait_for_completed()
 
 		new_game.did_win = None
 
