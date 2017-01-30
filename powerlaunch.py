@@ -8,8 +8,6 @@ With this minigame, power up Cozmo and launch your little buddy towards a cube t
 This is a variation on an archery or golf minigame.
 """
 
-#to do: add "no animation" version for demo
-
 import cozmo
 from cozmo.util import distance_mm, speed_mmps, degrees
 
@@ -24,7 +22,7 @@ def drive_cozmo_distance_angle(robot: cozmo.robot.Robot, distance, speed, angle=
 
 	robot.drive_straight(distance_mm(distance), speed_mmps(speed)).wait_for_completed()
 
-	#to do: add turning at an angle
+	#to do: add turning at an angle to increase game difficulty
 
 class PowerlaunchGame(object):
 	
@@ -93,8 +91,6 @@ class PowerlaunchGame(object):
 		self.random_distance_from_target = random.randint(distance_range_tuple[0], distance_range_tuple[1])
 		print("moving", self.random_distance_from_target, "mm away from target")
 
-#BUG WITH DISTANC MOVING?
-		#moves cozmo a random distance away from target, within distance range. The -50 is to account for movement during the cubediscovery animation.
 		drive_cozmo_distance_angle(robot, -(self.random_distance_from_target), 50)
 
 
@@ -112,7 +108,7 @@ class PowerlaunchGame(object):
 		launch_speed = 10 + (20 * self.user_defined_launch_power)
 		print("launch speed:", launch_speed)
 
-		drive_cozmo_distance_angle(robot, (self.launch_distance + 50), launch_speed)
+		drive_cozmo_distance_angle(robot, (self.launch_distance), launch_speed)
 
 		offset_from_target = self.launch_distance - self.random_distance_from_target
 		print("missed target by", offset_from_target)
@@ -130,17 +126,18 @@ class PowerlaunchGame(object):
 
 def cozmo_program(robot: cozmo.robot.Robot):
 
-#GAME DESIGN TUNING
+#DESIGN TUNING
 	distance_range_tuple = (100, 300)
 	angle_range_tuple = (0, 0)
 	tunable_margin_of_error = 10
+
 
 	user_menu_input = None
 
 #assumes cozmo is on charging station, and drives off
 	drive_cozmo_distance_angle(robot, 150, 50)
 
-	robot.say_text("Amy").wait_for_completed()
+	robot.play_anim("anim_launch_cubediscovery", in_parallel=True)
 
 	user_menu_input = input("\n\n\n-------->Welcome to Powerlaunch!\n\n-------->The goal is to topple a cube stack by powering up Cozmo with just the right amount of electroids.\n-------->After Cozmo gets a cube stack ready, take aim, and decide how much power.\n-------->Careful not to be underpowered or overpowered!\n\n-------->Press return to begin.")
 
@@ -157,11 +154,9 @@ def cozmo_program(robot: cozmo.robot.Robot):
 		new_game.make_cube_cycle_through_colors(robot, .5, new_game.list_of_identified_cubes[0], 0.003)
 
 		robot.play_anim("anim_reacttocliff_edge_01", in_parallel=True).wait_for_completed()
-		drive_cozmo_distance_angle(robot, 30, 50)
-
-		# robot.play_anim("anim_launch_cubediscovery", in_parallel=True).wait_for_completed()
-		
-		# new_game.make_cube_cycle_through_colors(robot, 3.5, new_game.list_of_identified_cubes[0], 0.003)
+		#gets cozmo right next to target
+		drive_cozmo_distance_angle(robot, 70, 50)
+		robot.turn_in_place(degrees(5)).wait_for_completed()
 
 		new_game.did_win = None
 
@@ -169,21 +164,17 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 			new_game.move_into_launch_position(robot, distance_range_tuple, angle_range_tuple)
 
-			# robot.play_anim("anim_launch_cubediscovery")
-
 			new_game.user_defined_launch_power = int(input("\n\n\n-------->Time to Powerlaunch!\n-------->Remember, too little power and he won't reach the target.\n-------->Too much and he'll be overpowered!\n\n-------->How many electroids will you give Cozmo (1-10)? "))
 			print("-------->Charging Cozmo with", new_game.user_defined_launch_power, "electroids!\n\n\n")
 
+			robot.set_all_backpack_lights(cozmo.lights.blue_light)
 			# robot.play_anim("anim_sparking_getin_01").wait_for_completed()
-			#turns cozmo to correct for movement during animation.
-			#to do: remove "wait for completed" redunancies. look at SDK for info on parallel and WFC.
-			# robot.turn_in_place(degrees(-23)).wait_for_completed()
+			# animation is for cozmo to "power up". Commenting out because it makes him turn at an angle.
 			
-			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple,tunable_margin_of_error)
-
+			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple, tunable_margin_of_error)
+			robot.set_backpack_lights_off()
+			
 			if new_game.did_win == "win":
-				
-				# robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 
 				# get close enough to FLIP it
 				drive_cozmo_distance_angle(robot, 30, 100)
@@ -193,32 +184,23 @@ def cozmo_program(robot: cozmo.robot.Robot):
 				robot.set_lift_height(0, duration=1.2).wait_for_completed()
 				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True) 
 
-				# robot.play_anim("anim_reacttoblock_success_01", in_parallel=True) 
-				#to do: look up in parallel
-				#to do: sometimes he doesn't flip the cube right
-
-				new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
-
 				user_menu_input = input('\n\n\n-------->You and Cozmo won! Press "return" to play again! Press "q" to quit.\n\n\n')
 
 			elif new_game.did_win == "under":
 
-				# robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
+				robot.play_anim("anim_rtpmemorymatch_no_01").wait_for_completed()
+				robot.turn_in_place(degrees(3)).wait_for_completed()
 
 				user_menu_input = input('\n\n\n-------->Not enough power! Press "return" to try again! Press "q" to quit.\n\n\n')
 				#moves Cozmo to cube so he can restart game
-				# robot.turn_in_place(degrees(6)).wait_for_completed()
-				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance), 50)
+				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance + 50), 50)
 
 			else:
-				#to do: going over registers as a win.
-				#new_game.did_win == "over"
-				#to do: the cozmo waits for the light cycle to be done before continuing on
-				# robot.play_anim("anim_rtpmemorymatch_no_01", in_parallel=True)
+				robot.play_anim("anim_rtpmemorymatch_no_01").wait_for_completed()
+				robot.turn_in_place(degrees(3)).wait_for_completed()
 
 				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
-				#moves Cozmo to restart game
-				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance), 50)
+
 
 
 if __name__ == '__main__':
