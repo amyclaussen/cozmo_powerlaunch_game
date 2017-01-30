@@ -94,8 +94,8 @@ class PowerlaunchGame(object):
 		print("moving", self.random_distance_from_target, "mm away from target")
 
 #BUG WITH DISTANC MOVING?
-		#moves cozmo a random distance away from target, within distance range. The -5 is to account for movement during the cubediscovery animation.
-		drive_cozmo_distance_angle(robot, -(self.random_distance_from_target - 5), 50)
+		#moves cozmo a random distance away from target, within distance range. The -50 is to account for movement during the cubediscovery animation.
+		drive_cozmo_distance_angle(robot, -(self.random_distance_from_target - 50), 50)
 
 
 	def launch_cozmo_towards_target(self, robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple, tunable_margin_of_error=0):
@@ -114,10 +114,10 @@ class PowerlaunchGame(object):
 
 		drive_cozmo_distance_angle(robot, self.launch_distance, launch_speed)
 
-		offset_from_target = self.random_distance_from_target - self.launch_distance
+		offset_from_target = self.launch_distance - self.random_distance_from_target
 		print("missed target by", offset_from_target)
 
-		if abs(offset_from_target) >= tunable_margin_of_error:
+		if abs(offset_from_target) <= tunable_margin_of_error:
 			self.did_win = "win"
 			print("missed target by", offset_from_target, "within acceptable margin of error of", tunable_margin_of_error)
 		elif offset_from_target < 0:
@@ -134,7 +134,6 @@ def cozmo_program(robot: cozmo.robot.Robot):
 	distance_range_tuple = (100, 300)
 	angle_range_tuple = (0, 0)
 	tunable_margin_of_error = 10
-###
 
 	user_menu_input = None
 
@@ -153,9 +152,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 		new_game.stack_cubes(robot)
 
-		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
+		robot.play_anim("anim_launch_cubediscovery", in_parallel=True)
 
-		robot.play_anim("anim_reacttoblock_success_01", in_parallel=True).wait_for_completed()
+		new_game.make_cube_cycle_through_colors(robot, .5, new_game.list_of_identified_cubes[0], 0.003)
+
+		robot.play_anim("anim_launch_cubediscovery", in_parallel=True).wait_for_completed()
+		
+		# new_game.make_cube_cycle_through_colors(robot, 3.5, new_game.list_of_identified_cubes[0], 0.003)
 
 		new_game.did_win = None
 
@@ -171,13 +174,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
 			robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 			#turns cozmo to correct for movement during animation.
 			#to do: remove "wait for completed" redunancies. look at SDK for info on parallel and WFC.
-			robot.turn_in_place(degrees(-24)).wait_for_completed()
+			robot.turn_in_place(degrees(-29)).wait_for_completed()
 			
 			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple,tunable_margin_of_error)
 
 			if new_game.did_win == "win":
 				
-				robot.play_anim("anim_reacttoblock_success_01").wait_for_completed()
+				robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 
 				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True) #to do: look up in parallel
 				#to do: sometimes he doesn't flip the cube right
