@@ -93,11 +93,12 @@ class PowerlaunchGame(object):
 		self.random_distance_from_target = random.randint(distance_range_tuple[0], distance_range_tuple[1])
 		print("moving", self.random_distance_from_target, "mm away from target")
 
-		#moves cozmo a random distance away from target, within distance range. The -30 is to account for movement during the cubediscovery animation.
-		drive_cozmo_distance_angle(robot, -(self.random_distance_from_target - 60), 50)
+#BUG WITH DISTANC MOVING?
+		#moves cozmo a random distance away from target, within distance range. The -5 is to account for movement during the cubediscovery animation.
+		drive_cozmo_distance_angle(robot, -(self.random_distance_from_target - 5), 50)
 
 
-	def launch_cozmo_towards_target(self, robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple):
+	def launch_cozmo_towards_target(self, robot: cozmo.robot.Robot, distance_range_tuple, angle_range_tuple, tunable_margin_of_error=0):
 
 		#power 1 = 0% over smallest disance in range. power 10 = at 100% largest distance in range.
 		launch_distance_percent_max = (self.user_defined_launch_power-1) * (1/9)
@@ -113,25 +114,34 @@ class PowerlaunchGame(object):
 
 		drive_cozmo_distance_angle(robot, self.launch_distance, launch_speed)
 
-		if self.random_distance_from_target - 5 <= self.launch_distance >= self.random_distance_from_target + 5:
+		offset_from_target = self.random_distance_from_target - self.launch_distance
+		print("missed target by", offset_from_target)
+
+		if abs(offset_from_target) >= tunable_margin_of_error:
 			self.did_win = "win"
-		elif self.launch_distance < self.random_distance_from_target - 5:
+			print("missed target by", offset_from_target, "within acceptable margin of error of", tunable_margin_of_error)
+		elif offset_from_target < 0:
 			self.did_win = "under"
+			print("missed target by", offset_from_target, "which is under acceptable margin of error of", tunable_margin_of_error)
 		else:
 			self.did_win = "over"
+			print("missed target by", offset_from_target, "which is over acceptable margin of error of", tunable_margin_of_error)
 
 
 def cozmo_program(robot: cozmo.robot.Robot):
 
+#GAME DESIGN TUNING
 	distance_range_tuple = (100, 300)
 	angle_range_tuple = (0, 0)
-	#to do: put the margin of error in the tuning, not the launch_cozmo_towards_target method
+	tunable_margin_of_error = 10
+###
 
 	user_menu_input = None
 
+#assumes cozmo is on charging station, and drives off
 	drive_cozmo_distance_angle(robot, 150, 50)
 
-	robot.play_anim("anim_reacttoblock_success_01", in_parallel=True)
+	robot.play_anim("anim_launch_cubediscovery")
 
 	user_menu_input = input("\n\n\n-------->Welcome to Powerlaunch!\n\n-------->The goal is to topple a cube stack by powering up Cozmo with just the right amount of electroids.\n-------->After Cozmo gets a cube stack ready, take aim, and decide how much power.\n-------->Careful not to be underpowered or overpowered!\n\n-------->Press return to begin.")
 
@@ -143,9 +153,9 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 		new_game.stack_cubes(robot)
 
-		robot.play_anim("anim_launch_cubediscovery", in_parallel=True)
-
 		new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.003)
+
+		robot.play_anim("anim_reacttoblock_success_01", in_parallel=True).wait_for_completed()
 
 		new_game.did_win = None
 
@@ -161,22 +171,20 @@ def cozmo_program(robot: cozmo.robot.Robot):
 			robot.play_anim("anim_sparking_getin_01").wait_for_completed()
 			#turns cozmo to correct for movement during animation.
 			#to do: remove "wait for completed" redunancies. look at SDK for info on parallel and WFC.
-			robot.turn_in_place(degrees(-27)).wait_for_completed()
+			robot.turn_in_place(degrees(-24)).wait_for_completed()
 			
-			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple)
-
-			robot.play_anim("anim_keepaway_fakeout_06").wait_for_completed()
+			new_game.launch_cozmo_towards_target(robot, distance_range_tuple, angle_range_tuple,tunable_margin_of_error)
 
 			if new_game.did_win == "win":
 				
-				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True).wait_for_completed() #to do: look up in parallel
+				robot.play_anim("anim_reacttoblock_success_01").wait_for_completed()
+
+				robot.play_anim("anim_reacttoblock_success_01", in_parallel=True) #to do: look up in parallel
 				#to do: sometimes he doesn't flip the cube right
 
 				new_game.make_cube_cycle_through_colors(robot, 4, new_game.list_of_identified_cubes[0], 0.001)
 
 				user_menu_input = input('\n\n\n-------->You and Cozmo won! Press "return" to play again! Press "q" to quit.\n\n\n')
-
-				break
 
 			elif new_game.did_win == "under":
 
@@ -187,8 +195,6 @@ def cozmo_program(robot: cozmo.robot.Robot):
 				robot.turn_in_place(degrees(5)).wait_for_completed()
 				drive_cozmo_distance_angle(robot, (new_game.random_distance_from_target - new_game.launch_distance + 60), 50)
 
-				break
-
 			else:
 				#to do: going over registers as a win.
 				#new_game.did_win == "over"
@@ -197,7 +203,6 @@ def cozmo_program(robot: cozmo.robot.Robot):
 
 				user_menu_input = input('\n\n\n-------->Careful! Too much power! Press "return" to try again! Press "q" to quit.\n\n\n')
 
-				break
 
 
 if __name__ == '__main__':
